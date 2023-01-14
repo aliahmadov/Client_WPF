@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Client_WPF.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,9 @@ namespace Client_WPF
         public MainWindow()
         {
             InitializeComponent();
+
+            var viewModel = new MainViewModel();
+            this.DataContext = viewModel;
         }
     }
 }
