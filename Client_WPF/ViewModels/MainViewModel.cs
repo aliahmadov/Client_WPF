@@ -65,14 +65,43 @@ namespace Client_WPF.ViewModels
             return null;
         }
 
-       
 
 
+
+
+        public async void StartSending()
+        {
+
+            ClientItem = new Item { ImagePath = MyImagePath, Title = Title };
+            try
+            {
+                if (Socket.Connected)
+                {
+                    MessageBox.Show("Connected to Server");
+
+                    var jsonString = FileHelper<Item>.Serialize(ClientItem);
+                    var bytes = Encoding.UTF8.GetBytes(jsonString);
+                    await Task.Run(() =>
+                    {
+                        Socket.Send(bytes);
+                    });
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show($@"Not possible to connect to the server
+                                      {ex.Message}");
+
+            }
+        }
         public MainViewModel()
         {
             Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             var ipAddress = IPAddress.Parse(GetLocalIPAddress());
-            var port = 80;
+            var port = 26000;
             var endPoint = new IPEndPoint(ipAddress, port);
 
             DragDropCommand = new RelayCommand(c =>
@@ -114,33 +143,9 @@ namespace Client_WPF.ViewModels
 
 
 
-            SendToServerCommand = new RelayCommand(async (c) =>
+            SendToServerCommand = new RelayCommand((c) =>
             {
-                ClientItem = new Item { ImagePath = MyImagePath, Title = Title };
-                try
-                {
-                    if (Socket.Connected)
-                    {
-                        MessageBox.Show("Connected to Server");
-                        while (true)
-                        {
-                            var jsonString = FileHelper<Item>.Serialize(ClientItem);
-                            var bytes = Encoding.UTF8.GetBytes(jsonString);
-                            await Task.Run(() =>
-                            {
-                                Socket.Send(bytes);
-                            });
-                            
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                    MessageBox.Show($@"Not possible to connect to the server
-                                      {ex.Message}");
-
-                }
+                StartSending();
             }, (a) =>
             {
                 if (IsConnected && Title != null) return true;
