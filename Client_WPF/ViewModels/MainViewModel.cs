@@ -2,6 +2,8 @@
 using Client_WPF.Helpers;
 using Client_WPF.Models;
 using Microsoft.Win32;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,7 +39,7 @@ namespace Client_WPF.ViewModels
             set { title = value; OnPropertyChanged(); }
         }
 
-        public byte[] ImageBytes { get; set; }
+        public string MyImagePath { get; set; }
         public RelayCommand ChooseImageCommand { get; set; }
 
         public RelayCommand ConnectCommand { get; set; }
@@ -63,6 +65,9 @@ namespace Client_WPF.ViewModels
             return null;
         }
 
+       
+
+
         public MainViewModel()
         {
             Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -79,7 +84,7 @@ namespace Client_WPF.ViewModels
                     string[] files = (string[])d.Data.GetData(DataFormats.FileDrop);
                     string fileName = Path.GetFileName(files[0]);
                     ImagePath = files[0];
-                    ImageBytes = File.ReadAllBytes(ImagePath);
+                    MyImagePath = ImagePath;
                 }
 
             });
@@ -98,18 +103,20 @@ namespace Client_WPF.ViewModels
                     Socket.Connect(endPoint);
                     IsConnected = true;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Not possible to connect");
-                    throw;
+                    MessageBox.Show($@"Not possible to connect
+                                       {ex.Message}");
+
                 }
             });
 
 
 
-            SendToServerCommand = new RelayCommand(c =>
+
+            SendToServerCommand = new RelayCommand(async (c) =>
             {
-                ClientItem = new Item { ImageBytes = ImageBytes, Title = Title };
+                ClientItem = new Item { ImagePath = MyImagePath, Title = Title };
                 try
                 {
                     if (Socket.Connected)
@@ -117,17 +124,22 @@ namespace Client_WPF.ViewModels
                         MessageBox.Show("Connected to Server");
                         while (true)
                         {
-                            var jsonString=FileHelper<Item>.Serialize(ClientItem);
+                            var jsonString = FileHelper<Item>.Serialize(ClientItem);
                             var bytes = Encoding.UTF8.GetBytes(jsonString);
-                            Socket.Send(bytes);
+                            await Task.Run(() =>
+                            {
+                                Socket.Send(bytes);
+                            });
+                            
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
 
-                    MessageBox.Show("Not possible to connect to the server");
-                    throw;
+                    MessageBox.Show($@"Not possible to connect to the server
+                                      {ex.Message}");
+
                 }
             }, (a) =>
             {

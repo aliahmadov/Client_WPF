@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace Client_WPF.Helpers
 {
-    public class FileHelper<T> where T : class
+    public class FileHelper<T>
     {
         public static string Serialize(T myObject)
         {
-            return JsonConvert.SerializeObject(myObject);
+            return JsonConvert.SerializeObject(myObject, Formatting.Indented);
 
         }
 
-        public static object Deserialize(string str)
+        public static T Deserialize(string str)
         {
-            return JsonConvert.DeserializeObject(str);
+            return JsonConvert.DeserializeObject<T>(str);
         }
     }
 
