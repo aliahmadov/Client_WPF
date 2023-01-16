@@ -8,7 +8,7 @@ namespace Client_WPF.Models
 {
     public class Item
     {
-        public string ImagePath { get; set; }
+        public byte[] ImageBytes { get; set; }
         public string Title { get; set; }
     }
 }

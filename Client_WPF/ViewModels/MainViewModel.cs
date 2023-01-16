@@ -40,7 +40,9 @@ namespace Client_WPF.ViewModels
             set { title = value; OnPropertyChanged(); }
         }
 
-        public string MyImagePath { get; set; }
+        //public string MyImagePath { get; set; }
+
+        public byte[] ImageBytes { get; set; }
         public RelayCommand ChooseImageCommand { get; set; }
 
         public RelayCommand ConnectCommand { get; set; }
@@ -73,13 +75,12 @@ namespace Client_WPF.ViewModels
         public async void StartSending()
         {
 
-            ClientItem = new Item { ImagePath = MyImagePath, Title = Title };
+            ClientItem = new Item { ImageBytes = ImageBytes, Title = Title };
             try
             {
                 if (Socket.Connected)
                 {
                     MessageBox.Show("Connected to Server");
-
                     var jsonString = FileHelper<Item>.Serialize(ClientItem);
                     var bytes = Encoding.UTF8.GetBytes(jsonString);
                     await Task.Run(() =>
@@ -113,11 +114,15 @@ namespace Client_WPF.ViewModels
                 {
                     string[] files = (string[])d.Data.GetData(DataFormats.FileDrop);
                     string fileName = Path.GetFileName(files[0]);
-                    ImagePath = files[0];
-                    MyImagePath = ImagePath;
-
-                    string path = HttpContext.Current.Server.MapPath("~/image/noimage.jpg");
-                    photo = File.ReadAllBytes(path);
+                    if (files[0].EndsWith(".jpg"))
+                    {
+                        ImagePath = files[0];
+                        ImageBytes = File.ReadAllBytes(ImagePath);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Only jpg format is supported");
+                    }
                 }
 
             });
