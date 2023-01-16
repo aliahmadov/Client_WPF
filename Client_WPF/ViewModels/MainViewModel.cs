@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
 
 namespace Client_WPF.ViewModels
@@ -114,6 +115,9 @@ namespace Client_WPF.ViewModels
                     string fileName = Path.GetFileName(files[0]);
                     ImagePath = files[0];
                     MyImagePath = ImagePath;
+
+                    string path = HttpContext.Current.Server.MapPath("~/image/noimage.jpg");
+                    photo = File.ReadAllBytes(path);
                 }
 
             });
